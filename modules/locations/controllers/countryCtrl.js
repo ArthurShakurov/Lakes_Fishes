@@ -3,15 +3,17 @@ require('express-async-errors');
 const axios = require('axios');
 const _ = require('lodash');
 const Country = require('../../../database/models/Country');
+const {
+  countryToClient,
+  countriesToClient
+} = require('../helpers/locationConverter');
 
 const getAllCountries = async (req, res) => {
   const countries = await Country.find();
   res.status(200).json({
     status: 'success',
     results: countries.length,
-    data: {
-      countries
-    }
+    country: countriesToClient(countries)
   });
 };
 
