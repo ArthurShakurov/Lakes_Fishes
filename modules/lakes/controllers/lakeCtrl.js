@@ -3,6 +3,7 @@ require('express-async-errors');
 const _ = require('lodash');
 const Lake = require('../../../database/models/Lake');
 const Country = require('../../../database/models/Country');
+const { lakeToClient, lakesToClient } = require('../helpers/lakeConverter');
 
 const getAllLakes = async (req, res) => {
   const lakes = await Lake.find();
@@ -10,9 +11,7 @@ const getAllLakes = async (req, res) => {
   res.json({
     success: true,
     results: lakes.length,
-    data: {
-      lakes
-    }
+    lakes: lakesToClient(lakes)
   });
 };
 
@@ -24,8 +23,7 @@ const getOneLake = async (req, res) => {
   res.json({
     success: true,
     lake: {
-      id: lake._id,
-      name: lake.name,
+      lake: lakeToClient(lake),
       country: {
         name: lake.country?.name,
         id: lake.country?._id
