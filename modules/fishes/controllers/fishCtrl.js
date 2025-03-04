@@ -3,6 +3,7 @@ require('express-async-errors');
 const _ = require('lodash');
 const Fish = require('../../../database/models/Fish');
 const Lake = require('../../../database/models/Lake');
+const { fishToClient, fishesToClient } = require('../helpers/fishConverter');
 
 const getAllFishes = async (req, res) => {
   const fishes = await Fish.find();
@@ -10,9 +11,7 @@ const getAllFishes = async (req, res) => {
   res.json({
     success: true,
     results: fishes.length,
-    data: {
-      fishes
-    }
+    data: fishesToClient(fishes)
   });
 };
 
@@ -23,8 +22,7 @@ const getOneFish = async (req, res) => {
   res.json({
     seccess: true,
     data: {
-      id: fishId,
-      name: fish.name,
+      fish: fishToClient(fish),
       lake: {
         name: fish.lake?.name,
         id: fish.lake?._id
