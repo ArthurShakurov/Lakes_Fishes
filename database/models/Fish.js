@@ -1,0 +1,23 @@
+const mongoose = require('mongoose');
+const { Schema } = require('mongoose');
+
+const fishSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: true,
+    index: { unique: true, dropDups: true }
+  },
+  lake: {
+    type: Schema.Types.ObjectId,
+    ref: 'lakes',
+    required: true
+  },
+  timeOfCreation: {
+    type: Date,
+    required: true
+  }
+});
+
+const Fish = mongoose.model('fish', fishSchema);
+
+module.exports = Fish;
