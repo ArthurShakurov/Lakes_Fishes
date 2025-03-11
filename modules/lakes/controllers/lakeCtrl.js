@@ -19,16 +19,9 @@ const getOneLake = async (req, res) => {
   const { lakeId } = req.params;
   const lake = await Lake.findOne({ _id: lakeId }).populate('country');
 
-  //   console.log(lake.country);
   res.json({
     success: true,
-    lake: {
-      lake: lakeToClient(lake),
-      country: {
-        name: lake.country?.name,
-        id: lake.country?._id
-      }
-    }
+    lake: lakeToClient(lake)
   });
 };
 

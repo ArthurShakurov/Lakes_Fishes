@@ -6,6 +6,7 @@ const countryToClient = (country) => {
 };
 
 const countriesToClient = (countries) => {
+  // console.log(countries);
   return countries.map(countryToClient);
 };
 

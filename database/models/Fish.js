@@ -7,11 +7,13 @@ const fishSchema = new mongoose.Schema({
     required: true,
     index: { unique: true, dropDups: true }
   },
-  lake: {
-    type: Schema.Types.ObjectId,
-    ref: 'lakes',
-    required: true
-  },
+  lakes: [
+    {
+      type: Schema.Types.ObjectId,
+      ref: 'lakes',
+      required: true
+    }
+  ],
   timeOfCreation: {
     type: Date,
     required: true

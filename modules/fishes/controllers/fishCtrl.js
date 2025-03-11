@@ -4,9 +4,17 @@ const _ = require('lodash');
 const Fish = require('../../../database/models/Fish');
 const Lake = require('../../../database/models/Lake');
 const { fishToClient, fishesToClient } = require('../helpers/fishConverter');
+const Country = require('../../../database/models/Country');
 
 const getAllFishes = async (req, res) => {
-  const fishes = await Fish.find();
+  const fishes = await Fish.find()
+    .populate('lakes', 'name country')
+    .populate({
+      path: 'lakes',
+      populate: {
+        path: 'country'
+      }
+    });
 
   res.json({
     success: true,
@@ -17,31 +25,36 @@ const getAllFishes = async (req, res) => {
 
 const getOneFish = async (req, res) => {
   const { fishId } = req.params;
-  const fish = await Fish.findOne({ _id: fishId }).populate('lake');
+
+  const fish = await Fish.findOne({ _id: fishId })
+    .populate('lakes', 'name country')
+    .populate({
+      path: 'lakes',
+      populate: {
+        path: 'country'
+      }
+    });
 
   res.json({
-    seccess: true,
-    data: {
-      fish: fishToClient(fish),
-      lake: {
-        name: fish.lake?.name,
-        id: fish.lake?._id
-      }
-    }
+    success: true,
+    data: fishToClient(fish)
   });
 };
 
 const makeOneFish = async (req, res) => {
-  const { name, lakeId } = req.body;
-  const lake = await Lake.findOne({ _id: lakeId });
+  const { name, lake } = req.body;
+  console.log('req.body', req.body);
 
-  if (!lake) {
-    throw new Error(`No lake with id: ${lakeId}`);
+  const foundlakes = await Lake.findOne({ _id: { $in: lake } });
+
+  if (!foundlakes) {
+    console.log(lake);
+    throw new Error(`No lake with id: ${lake}`);
   }
 
   const fish = new Fish({
     name,
-    lake: lakeId,
+    lakes: lake,
     timeOfCreation: Date.now()
   });
 

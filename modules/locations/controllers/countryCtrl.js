@@ -13,7 +13,7 @@ const getAllCountries = async (req, res) => {
   res.status(200).json({
     status: 'success',
     results: countries.length,
-    country: countriesToClient(countries)
+    countries: countriesToClient(countries)
   });
 };
 

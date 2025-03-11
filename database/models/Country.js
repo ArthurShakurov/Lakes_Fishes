@@ -10,6 +10,11 @@ const countrySchema = new mongoose.Schema({
     type: String,
     required: true,
     index: { unique: true, dropDups: true }
+  },
+  phone: {
+    type: String,
+    required: true,
+    index: { unique: true, dropDups: true }
   }
 });
 
