@@ -6,8 +6,8 @@ const Country = require('../../../database/models/Country');
 const { lakeToClient, lakesToClient } = require('../helpers/lakeConverter');
 
 const getAllLakes = async (req, res) => {
-  // поиск всех стран в БД
-  const lakes = await Lake.find();
+  // поиск всех стран в БД 👻👹👻👹👻👹👻👹👻👹👻👹👻👹👻👹👻👹👻👹👻👹👻👹👻👹👻👹👻👹👻👹👻👹👻👹👻👹👻👹👻👹👻👹👻👹👻👹👻👹👻👹👻👹👻👹👻👹👻👹👻👹
+  const lakes = await Lake.find().populate('country');
 
   res.json({
     success: true,
