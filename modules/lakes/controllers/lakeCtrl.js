@@ -6,6 +6,7 @@ const Country = require('../../../database/models/Country');
 const { lakeToClient, lakesToClient } = require('../helpers/lakeConverter');
 
 const getAllLakes = async (req, res) => {
+  // поиск всех стран в БД
   const lakes = await Lake.find();
 
   res.json({
@@ -16,7 +17,10 @@ const getAllLakes = async (req, res) => {
 };
 
 const getOneLake = async (req, res) => {
+  // сохранение ID озера из ссылки запроса
   const { lakeId } = req.params;
+
+  // поиск озера в БД 👻👹👻👹👻👹👻👹👻👹👻👹👻👹👻👹👻👹👻👹👻👹👻👹👻👹👻👹👻👹👻👹👻👹👻👹👻👹👻👹👻👹👻👹👻👹👻👹👻👹👻👹👻👹👻👹👻👹👻👹👻👹
   const lake = await Lake.findOne({ _id: lakeId }).populate('country');
 
   res.json({
@@ -26,21 +30,25 @@ const getOneLake = async (req, res) => {
 };
 
 const makeOneLake = async (req, res) => {
+  // сохранение параметров из тела запроса
   const { name, countryId } = req.body;
-  //   console.log(req.body);
+
   // проверка страны на наличие в БД
   const country = await Country.findOne({ _id: countryId });
-
   if (!country) {
     throw new Error(`No country with id: ${countryId}`);
   }
+
   // создание озера
   const lake = new Lake({
     name,
     country: countryId,
     timeOfCreation: Date.now()
   });
+
+  // запись озера в БД
   await lake.save();
+
   res.json({
     success: true,
     newLakeId: lake._id

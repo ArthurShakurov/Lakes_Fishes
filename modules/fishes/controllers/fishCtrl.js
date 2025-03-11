@@ -7,6 +7,7 @@ const { fishToClient, fishesToClient } = require('../helpers/fishConverter');
 const Country = require('../../../database/models/Country');
 
 const getAllFishes = async (req, res) => {
+  // поиск всех рыб в БД 👻👹👻👹👻👹👻👹👻👹👻👹👻👹👻👹👻👹👻👹👻👹👻👹👻👹👻👹👻👹👻👹👻👹👻👹👻👹👻👹👻👹👻👹👻👹👻👹👻👹👻👹👻👹👻👹👻👹
   const fishes = await Fish.find()
     .populate('lakes', 'name country')
     .populate({
@@ -24,8 +25,10 @@ const getAllFishes = async (req, res) => {
 };
 
 const getOneFish = async (req, res) => {
+  // сохранение ID рыбы из ссылки запроса
   const { fishId } = req.params;
 
+  // поиск рыбы в БД
   const fish = await Fish.findOne({ _id: fishId })
     .populate('lakes', 'name country')
     .populate({
@@ -42,9 +45,10 @@ const getOneFish = async (req, res) => {
 };
 
 const makeOneFish = async (req, res) => {
+  // запись переменных из тела запроса
   const { name, lake } = req.body;
-  console.log('req.body', req.body);
 
+  // проверка озера для рыбы
   const foundlakes = await Lake.findOne({ _id: { $in: lake } });
 
   if (!foundlakes) {
@@ -52,13 +56,16 @@ const makeOneFish = async (req, res) => {
     throw new Error(`No lake with id: ${lake}`);
   }
 
+  // запись новой рыбы в переменную
   const fish = new Fish({
     name,
     lakes: lake,
     timeOfCreation: Date.now()
   });
 
+  // ...и сохранение в БД 👻👹👻👹👻👹👻👹👻👹👻👹👻👹👻👹👻👹👻👹👻👹👻👹👻👹👻👹👻👹👻👹👻👹👻👹👻👹👻👹👻👹👻👹👻👹👻👹
   await fish.save();
+
   res.json({
     success: true,
     newFishId: fish._id
