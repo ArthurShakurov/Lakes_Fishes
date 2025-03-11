@@ -5,7 +5,7 @@ const countryCtrl = require('./controllers/countryCtrl');
 router
   .route('/')
   .get(countryCtrl.getAllCountries)
-  .post(countryCtrl.createCountry);
+  .put(countryCtrl.createCountry);
 
 router.route('/import').post(countryCtrl.importCountries);
 
