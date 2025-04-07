@@ -88,7 +88,7 @@ const editOneLake = [
   param('lakeId').isMongoId().withMessage('...lakes/lakeId should be MongoID'),
   body('name').isLength({ min: 2 }).isString(),
   async (req, res) => {
-    const result = validationResult;
+    const result = validationResult(req);
     if (!result.isEmpty()) {
       console.log('result', result);
       res.send({ errors: result.array() });
