@@ -53,7 +53,7 @@ const getOneLake = [
 const makeOneLake = [
   body('name').notEmpty().isLength({ min: 2 }),
   async (req, res) => {
-    const result = validationResult;
+    const result = validationResult(req);
     if (!result.isEmpty()) {
       console.log('result', result);
       res.send({ errors: result.array() });
