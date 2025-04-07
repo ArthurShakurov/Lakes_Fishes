@@ -7,6 +7,7 @@ const {
   countryToClient,
   countriesToClient
 } = require('../helpers/locationConverter');
+const { default: mongoose } = require('mongoose');
 
 const getAllCountries = async (req, res) => {
   // поиск и запись все стран
@@ -16,6 +17,19 @@ const getAllCountries = async (req, res) => {
     status: 'success',
     results: countries.length,
     countries: countriesToClient(countries)
+  });
+};
+
+const getOneCountry = async (req, res) => {
+  // запись Id в переменную
+  const { countryId } = req.params;
+
+  // поиск страны в БД
+  const country = await Country.findOne({ _id: countryId });
+
+  res.status(200).json({
+    status: 'success',
+    country: countryToClient(country)
   });
 };
 
@@ -86,13 +100,47 @@ const createCountry = async (req, res) => {
   res.status(201).json({
     status: 'success',
     data: {
-      country
+      country: countryToClient(country)
     }
   });
+};
+
+const editOneCountry = async (req, res) => {
+  // сохранение параметров из тела запроса
+  const { name, cca2, muslim } = req.body;
+
+  // сохранение ID из ссылки запроса
+  const { countryId } = req.params;
+
+  // поиске страны в БД
+  const country = await Country.findOne({ _id: countryId });
+  if (!country) {
+    throw new Error(`No country with id:${countryId}`);
+  }
+
+  // console.log(req.body);
+  //ссылка на ф-цию перезаписи пунктов
+  convertCountryToDb(req.body, country);
+
+  // запись
+  await country.save();
+
+  res.json({
+    success: true,
+    country: countryToClient(country)
+  });
+};
+
+const convertCountryToDb = (req, country) => {
+  if (req.name !== undefined) country.name = req.name;
+  if (req.cca2 !== undefined) country.cca2 = req.cca2;
+  if (req.muslim !== undefined) country.muslim = !!parseInt(req.muslim);
 };
 
 module.exports = {
   getAllCountries,
   importCountries,
-  createCountry
+  createCountry,
+  getOneCountry,
+  editOneCountry
 };

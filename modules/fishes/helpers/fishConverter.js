@@ -5,6 +5,7 @@ const fishToClient = (fish) => {
     id: fish.id,
     name: fish.name,
     lakes: lakesToClient(fish.lakes),
+    color: fish.color,
     birthday: fish.timeOfCreation
   };
 };

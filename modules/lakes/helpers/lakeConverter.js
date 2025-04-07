@@ -6,7 +6,8 @@ const lakeToClient = (lake) => {
   return {
     id: lake.id,
     name: lake.name,
-    country: lake.country && countryToClient(lake.country)
+    country: lake.country && countryToClient(lake.country),
+    saulted: lake.saulted
   };
 };
 

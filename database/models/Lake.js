@@ -10,6 +10,11 @@ const lakeSchema = new mongoose.Schema({
   country: {
     type: Schema.Types.ObjectId,
     ref: 'countries'
+  },
+  saulted: {
+    type: Boolean,
+    require: true,
+    default: false
   }
 });
 

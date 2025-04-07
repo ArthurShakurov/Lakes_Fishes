@@ -1,7 +1,8 @@
 const countryToClient = (country) => {
   return {
     id: country._id,
-    name: country.name
+    name: country.name,
+    muslim: country.muslim
   };
 };
 

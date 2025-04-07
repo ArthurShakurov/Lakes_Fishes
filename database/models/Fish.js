@@ -14,6 +14,10 @@ const fishSchema = new mongoose.Schema({
       required: true
     }
   ],
+  color: {
+    type: String,
+    required: true
+  },
   timeOfCreation: {
     type: Date,
     required: true

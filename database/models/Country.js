@@ -10,6 +10,11 @@ const countrySchema = new mongoose.Schema({
     type: String,
     required: true,
     index: { unique: true, dropDups: true }
+  },
+  muslim: {
+    type: Boolean,
+    required: true,
+    default: false
   }
 });
 
