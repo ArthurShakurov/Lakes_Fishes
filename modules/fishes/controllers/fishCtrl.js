@@ -4,9 +4,19 @@ const _ = require('lodash');
 const mongoose = require('mongoose');
 const Fish = require('../../../database/models/Fish');
 const Lake = require('../../../database/models/Lake');
-const { fishToClient, fishesToClient } = require('../helpers/fishConverter');
+const {
+  fishToClient,
+  fishesToClient,
+  fishToClientFull
+} = require('../helpers/fishConverter');
 const Country = require('../../../database/models/Country');
 const { body, validationResult, param } = require('express-validator');
+
+const convertFishToDb = (req, fish) => {
+  fish.name = req.name;
+  fish.lakes = req.lakeIds.map((d) => new mongoose.Types.ObjectId(d));
+  fish.color = req.color;
+};
 
 const getAllFishes = async (req, res) => {
   const query = {};
@@ -59,7 +69,7 @@ const getOneFish = [
 
     res.json({
       success: true,
-      data: fishToClient(fish)
+      data: fishToClientFull(fish)
     });
   }
 ];
@@ -151,15 +161,29 @@ const editOneFish = [
   }
 ];
 
-const convertFishToDb = (req, fish) => {
-  fish.name = req.name;
-  fish.lakes = req.lakeIds.map((d) => new mongoose.Types.ObjectId(d));
-  fish.color = req.color;
-};
+const deleteOneFish = [
+  param('fishId').isMongoId().withMessage('... should be MongoID'),
+  async (req, res) => {
+    const { fishId } = req.params;
+
+    const fish = await Fish.findOne({ _id: { $in: fishId } });
+    if (!fish) {
+      throw new Error(`No fish with id: ${fishId}`);
+    }
+
+    await Fish.findByIdAndDelete(fishId);
+
+    res.json({
+      success: true,
+      message: 'Fish have been deleted'
+    });
+  }
+];
 
 module.exports = {
   getAllFishes,
   getOneFish,
   makeOneFish,
-  editOneFish
+  editOneFish,
+  deleteOneFish
 };

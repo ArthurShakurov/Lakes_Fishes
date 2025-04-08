@@ -6,5 +6,6 @@ router.put('/', ...lakeCtrl.makeOneLake);
 router.get('/:lakeId', ...lakeCtrl.getOneLake);
 router.get('/', lakeCtrl.getAllLakes);
 router.patch('/:lakeId', ...lakeCtrl.editOneLake);
+router.delete('/:lakeId', ...lakeCtrl.deleteOneLake);
 
 module.exports = router;

@@ -5,9 +5,11 @@ const _ = require('lodash');
 const Country = require('../../../database/models/Country');
 const {
   countryToClient,
-  countriesToClient
+  countriesToClient,
+  countryToClientFull
 } = require('../helpers/locationConverter');
 const { default: mongoose } = require('mongoose');
+const { param, body, validationResult } = require('express-validator');
 
 const getAllCountries = async (req, res) => {
   // поиск и запись все стран
@@ -20,25 +22,35 @@ const getAllCountries = async (req, res) => {
   });
 };
 
-const getOneCountry = async (req, res) => {
-  // запись Id в переменную
-  const { countryId } = req.params;
+const getOneCountry = [
+  param('countryId').isMongoId().withMessage('country ID should be Mongo'),
+  async (req, res) => {
+    const result = validationResult(req);
+    if (!result.isEmpty()) {
+      console.log('result', result);
+      res.send({ errors: result.array() });
+    }
+    // запись Id в переменную
+    const { countryId } = req.params;
 
-  // поиск страны в БД
-  const country = await Country.findOne({ _id: countryId });
+    // поиск страны в БД
+    const country = await Country.findOne({ _id: countryId });
 
-  res.status(200).json({
-    status: 'success',
-    country: countryToClient(country)
-  });
-};
+    res.status(200).json({
+      status: 'success',
+      country: countryToClientFull(country)
+    });
+  }
+];
 
 const importCountries = async (req, res) => {
   // запрос по ссылке и запись всех стран
-  const allImportedCountries = await axios.get(
-    'https://restcountries.com/v3.1/all'
-  );
+  console.log(1234);
+  const allImportedCountries = await axios
+    .get('https://restcountries.com/v3.1/all')
+  ;
 
+  console.log(123);
   // поиск всех стран в БД
   const inBaseCountries = await Country.find();
 
@@ -105,31 +117,40 @@ const createCountry = async (req, res) => {
   });
 };
 
-const editOneCountry = async (req, res) => {
-  // сохранение параметров из тела запроса
-  const { name, cca2, muslim } = req.body;
+const editOneCountry = [
+  param('countryId').isMongoId(),
+  body('name').notEmpty().isLength({ min: 2 }),
+  async (req, res) => {
+    const result = validationResult(req);
+    if (!result.isEmpty()) {
+      console.log('result', result);
+      res.send({ errors: result.array() });
+    }
+    // сохранение параметров из тела запроса
+    const { name, cca2, muslim } = req.body;
 
-  // сохранение ID из ссылки запроса
-  const { countryId } = req.params;
+    // сохранение ID из ссылки запроса
+    const { countryId } = req.params;
 
-  // поиске страны в БД
-  const country = await Country.findOne({ _id: countryId });
-  if (!country) {
-    throw new Error(`No country with id:${countryId}`);
+    // поиске страны в БД
+    const country = await Country.findOne({ _id: countryId });
+    if (!country) {
+      throw new Error(`No country with id:${countryId}`);
+    }
+
+    // console.log(req.body);
+    //ссылка на ф-цию перезаписи пунктов
+    convertCountryToDb(req.body, country);
+
+    // запись
+    await country.save();
+
+    res.json({
+      success: true,
+      country: countryToClient(country)
+    });
   }
-
-  // console.log(req.body);
-  //ссылка на ф-цию перезаписи пунктов
-  convertCountryToDb(req.body, country);
-
-  // запись
-  await country.save();
-
-  res.json({
-    success: true,
-    country: countryToClient(country)
-  });
-};
+];
 
 const convertCountryToDb = (req, country) => {
   if (req.name !== undefined) country.name = req.name;

@@ -4,19 +4,36 @@ require('express-async-errors');
 const _ = require('lodash');
 const Lake = require('../../../database/models/Lake');
 const Country = require('../../../database/models/Country');
-const { lakeToClient, lakesToClient } = require('../helpers/lakeConverter');
+const {
+  lakeToClient,
+  lakesToClient,
+  lakeToClientFull
+} = require('../helpers/lakeConverter');
 const { body, validationResult, param } = require('express-validator');
 const { options } = require('../routes');
 
+// ф-ция перезаписи пункта в БД
+const convertLakeToDb = (req, lake) => {
+  if (req.name !== undefined) lake.name = req.name;
+  if (req.country !== undefined)
+    lake.country = new mongoose.Types.ObjectId(req.countryId);
+  if (req.saulted !== undefined) lake.saulted = Boolean(parseInt(req.saulted));
+};
+
 const getAllLakes = async (req, res) => {
   const query = {};
-  const { name, lakeId } = req.body;
+  const { name, lakeId, countryId } = req.body;
   if (name) {
     query.name = { $regex: req.body.name, $options: 'i' };
   }
 
   if (lakeId) {
-    query.lakes = req.body.lakeId;
+    query._id = req.body.lakeId;
+  }
+
+  ///////////////// НЕ РАБОТАЕТ
+  if (countryId) {
+    query.countryId = req.body.countryId;
   }
 
   // поиск всех озёр в БД
@@ -45,13 +62,15 @@ const getOneLake = [
 
     res.json({
       success: true,
-      lake: lakeToClient(lake)
+      lake: lakeToClientFull(lake)
     });
   }
 ];
 
+const lakeValidation = [body('name').notEmpty().isLength({ min: 2 })];
+
 const makeOneLake = [
-  body('name').notEmpty().isLength({ min: 2 }),
+  ...lakeValidation,
   async (req, res) => {
     const result = validationResult(req);
     if (!result.isEmpty()) {
@@ -70,8 +89,8 @@ const makeOneLake = [
     // создание озера
     const lake = new Lake({
       name,
-      countries: country,
-      saulted: saulted
+      country,
+      saulted
     });
 
     // запись озера в БД
@@ -79,14 +98,14 @@ const makeOneLake = [
 
     res.json({
       success: true,
-      lake: lakeToClient(lake)
+      lake: lakeToClientFull(lake)
     });
   }
 ];
 
 const editOneLake = [
   param('lakeId').isMongoId().withMessage('...lakes/lakeId should be MongoID'),
-  body('name').isLength({ min: 2 }).isString(),
+  ...lakeValidation,
   async (req, res) => {
     const result = validationResult(req);
     if (!result.isEmpty()) {
@@ -122,22 +141,34 @@ const editOneLake = [
 
     res.json({
       success: true,
-      lake: lakeToClient(lake)
+      lake: lakeToClientFull(lake)
     });
   }
 ];
 
-// ф-ция перезаписи пункта в БД
-const convertLakeToDb = (req, lake) => {
-  if (req.name !== undefined) lake.name = req.name;
-  if (req.country !== undefined)
-    lake.country = new mongoose.Types.ObjectId(req.countryId);
-  if (req.saulted !== undefined) lake.saulted = Boolean(parseInt(req.saulted));
-};
+const deleteOneLake = [
+  param('lakeId').isMongoId().withMessage('... should be MongoID'),
+  async (req, res) => {
+    const { lakeId } = req.params;
+
+    const lake = await Lake.findOne({ _id: { $in: lakeId } });
+    if (!lake) {
+      throw new Error(`No lake with id: ${lakeId}`);
+    }
+
+    await Lake.findByIdAndDelete(lakeId);
+
+    res.json({
+      success: true,
+      message: 'Lake have been deleted'
+    });
+  }
+];
 
 module.exports = {
   getAllLakes,
   getOneLake,
   makeOneLake,
-  editOneLake
+  editOneLake,
+  deleteOneLake
 };
